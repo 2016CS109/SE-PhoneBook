@@ -12,13 +12,82 @@ namespace WebApplication2.Controllers
     {
         // GET: Test
         public ActionResult Index()
-        {
-            using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+        {        
+            PhoneBookDbEntities db = new PhoneBookDbEntities();
+            List<Person> list = db.People.ToList();
+            List<Person> temp = new List<Person>();
+            //List<StudentViewModel> viewList = new List<StudentViewModel>();
+            foreach (Person s in list)
             {
-                return View(obj.People.ToList());
+                if(s.AddedBy == User.Identity.GetUserId())
+                {
+                    temp.Add(s);
+                }
             }
+            
+            return View(temp);
+            //using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+            //{
+            //    return View(obj.People.ToList());
+            //}
         }
 
+        //GET: Test
+        public ActionResult ContactIndex()
+        {
+            PhoneBookDbEntities db = new PhoneBookDbEntities();
+            List<Person> list = db.People.ToList();
+            List<Contact> contact_lst = db.Contacts.ToList();
+            List<Contact> temp = new List<Contact>();
+            //List<StudentViewModel> viewList = new List<StudentViewModel>();
+            foreach (Person s in list)
+            {
+                if (s.AddedBy == User.Identity.GetUserId())
+                {
+                    foreach(Contact contact in contact_lst)
+                    {
+                        if (s.PersonId == contact.PersonId)
+                        {
+                            temp.Add(contact);
+                        }
+                    }
+                    
+                }
+            }
+            return View(temp);
+        }
+        public ActionResult Dashboard()
+        {
+            int counter = 0;
+            PhoneBookDbEntities db = new PhoneBookDbEntities();
+            List<Person> list = db.People.ToList();
+            List<Person> temp = new List<Person>();
+            List<Person> temp1 = new List<Person>();
+            //List<StudentViewModel> viewList = new List<StudentViewModel>();
+            foreach (Person s in list)
+            {
+                if (s.AddedBy == User.Identity.GetUserId())
+                {
+                    DateTime bd = Convert.ToDateTime(s.DateOfBirth);
+                    counter = counter + 1;
+                    if ( bd.Day == DateTime.Now.AddDays(1).Day || bd.Day == DateTime.Now.AddDays(10).Day || (bd.Day > DateTime.Now.AddDays(1).Day && bd.Day < DateTime.Now.AddDays(10).Day))
+                    {
+                        temp.Add(s);
+                    }
+                    if (s.UpdateOn == DateTime.Now.AddDays(-1) || s.UpdateOn == DateTime.Now.AddDays(-7) || (s.UpdateOn < DateTime.Now.AddDays(-1) && s.UpdateOn > DateTime.Now.AddDays(-7)))
+                    {
+                        temp1.Add(s);
+                    }
+                }
+            }
+            Session["No_of_Person_Added"] = counter;
+            var model = new Class3()
+            {
+               BirthdayList = temp,
+               UpdateList = temp1,
+            };
+           return View(model);
+        }
         // GET: Test/Details/5
         public ActionResult Details(int id)
         {
@@ -40,8 +109,6 @@ namespace WebApplication2.Controllers
         [HttpPost]
         public ActionResult Create(Class1 obj)
         {
-            string chk = "hello";
-            string lol = "conn";
             try
             {
                 // TODO: Add insert logic here
@@ -55,9 +122,9 @@ namespace WebApplication2.Controllers
                 p.HomeAddress = obj.HomeAddress;
                 p.HomeCity = obj.HomeCity;
                 p.FaceBookAccountId = obj.FaceBookAccountId;
-                p.LinkedInId = chk;
+                p.LinkedInId = obj.LinkInId;
                 p.UpdateOn = DateTime.Now;
-                p.ImagePath = lol;
+                p.ImagePath = obj.ImagePath;
                 p.TwitterId = obj.TwitterId;
                 p.EmailId = obj.EmailId;
                 using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
@@ -105,12 +172,25 @@ namespace WebApplication2.Controllers
         // GET: Test/Delete/5
         public ActionResult Delete(int id)
         {
+            int count = 0;
+            using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+            {
+                List<Contact> list = ent.Contacts.ToList();
+                foreach (Contact s in list)
+                {
+                    if (s.PersonId == id)
+                    {
+                        count = count + 1;
+                    }
+                }
+            }
+            Session["No_of_Contact_Added_Against_this_Person"] = count;
             using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
             {
                 return View(obj.People.Where(x => x.PersonId == id).FirstOrDefault());
             }
         }
-
+        
         // POST: Test/Delete/5
         [HttpPost]
         public ActionResult Delete(int id, FormCollection collection)
@@ -118,14 +198,120 @@ namespace WebApplication2.Controllers
             try
             {
                 // TODO: Add delete logic here
-                using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+                using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
                 {
-                   Person person = obj.People.Where(x => x.PersonId == id).FirstOrDefault();
-                    obj.People.Remove(person);
-                    obj.SaveChanges();
+                    
+                    Person person = ent.People.Where(x => x.PersonId == id).FirstOrDefault();
+                    //Contact contact = ent.Contacts.Where(x => x.PersonId == id).FirstOrDefault();
+                    //ent.Contacts.Remove(contact);
+                    List<Contact> list = ent.Contacts.ToList();
+                    foreach (Contact s in list)
+                    {
+                        if (s.PersonId == id)
+                        {
+                            ent.Contacts.Remove(s);
+                            ent.SaveChanges();
+                        }
+                    }
+                    
+                    ent.People.Remove(person);
+                    ent.SaveChanges();
                 }
-
                 return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+        // GET: Test/Contact
+        public ActionResult Contact()
+        {
+            return View();
+        }
+        [HttpPost]
+        public ActionResult Contact(int id, Class2 obj)
+        {
+            try
+            {
+                Contact c = new Contact();
+                c.ContactNumber = obj.ContactNumber;
+                c.Type = obj.Type;
+                c.PersonId = id;
+                using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+                {
+                    ent.Contacts.Add(c);
+                    ent.SaveChanges();
+                }
+                return RedirectToAction("ContactIndex");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: Test/Details/5
+        public ActionResult ContactDetails(int id)
+        {
+            using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+            {
+                return View(obj.Contacts.Where(x => x.ContactId == id).FirstOrDefault());
+            }
+
+        }
+        // GET: Test/Edit/5
+        public ActionResult ContactEdit(int id)
+        {
+            using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+            {
+                return View(obj.Contacts.Where(x => x.ContactId == id).FirstOrDefault());
+            }
+        }
+
+        // POST: Test/Edit/5
+        [HttpPost]
+        public ActionResult ContactEdit(int id, Contact obj)
+        {
+            try
+            {
+                // TODO: Add update logic here
+                using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+                {
+                    ent.Entry(obj).State = System.Data.Entity.EntityState.Modified;
+                    ent.SaveChanges();
+                }
+                return RedirectToAction("ContactIndex");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: Test/Delete/5
+        public ActionResult ContactDelete(int id)
+        {
+            using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+            {
+                return View(obj.Contacts.Where(x => x.ContactId == id).FirstOrDefault());
+            }
+        }
+
+        // POST: Test/Delete/5
+        [HttpPost]
+        public ActionResult ContactDelete(int id, FormCollection collection)
+        {
+            try
+            {
+                // TODO: Add delete logic here
+                using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+                {
+                    Contact contact = ent.Contacts.Where(x => x.ContactId == id).FirstOrDefault();
+                    ent.Contacts.Remove(contact);
+                    ent.SaveChanges();
+                }
+                return RedirectToAction("ContactIndex");
             }
             catch
             {

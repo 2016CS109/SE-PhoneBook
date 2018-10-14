@@ -14,8 +14,10 @@ namespace WebApplication2.Models
         public string HomeAddress { get; set; }
         public string HomeCity { get; set; }
         public string FaceBookAccountId { get; set; }
+        public string LinkInId { get; set; }
+        public string ImagePath { get; set; }
         public string TwitterId { get; set; }
         public string EmailId { get; set; }
-        public int ContactNumber { get; set; }
+
     }
 }

@@ -1,0 +1,200 @@
+﻿@model WebApplication2.Models.Class3
+
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<h2>Dashboard</h2>
+<h3>No_of_Person_Added = @Session["No_of_Person_Added"]</h3>
+<h4>BirthdayList</h4>
+<table class="table">
+    <tr>
+        <th>
+            FirstName
+        </th>
+        <th>
+            MiddleName
+        </th>
+        <th>
+            LastName
+        </th>
+        <th>
+            DateOfBirth
+        </th>
+        <th>
+            AddedOn
+        </th>
+        <th>
+            AddedBy
+        </th>
+        <th>
+            HomeAddress
+        </th>
+        <th>
+            HomeCity
+        </th>
+        <th>
+            FaceBookAccountId
+        </th>
+        <th>
+            LinkedInId
+        </th>
+        <th>
+            UpdateOn
+        </th>
+        <th>
+            ImagePath
+        </th>
+        <th>
+            TwitterId
+        </th>
+        <th>
+            EmailId
+        </th>
+        <th></th>
+    </tr>
+    @foreach (var item in Model.BirthdayList)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MiddleName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateOfBirth)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AddedOn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AddedBy)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HomeAddress)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HomeCity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FaceBookAccountId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LinkedInId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdateOn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ImagePath)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TwitterId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EmailId)
+            </td>
+            <td>
+        </tr>
+    }
+</table>
+<h4>UpdateList</h4>
+<table class="table">
+        <tr>
+            <th>
+                FirstName
+            </th>
+            <th>
+                MiddleName
+            </th>
+            <th>
+                LastName
+            </th>
+            <th>
+                DateOfBirth
+            </th>
+            <th>
+                AddedOn
+            </th>
+            <th>
+                AddedBy
+            </th>
+            <th>
+                HomeAddress
+            </th>
+            <th>
+                HomeCity
+            </th>
+            <th>
+                FaceBookAccountId
+            </th>
+            <th>
+                LinkedInId
+            </th>
+            <th>
+                UpdateOn
+            </th>
+            <th>
+                ImagePath
+            </th>
+            <th>
+                TwitterId
+            </th>
+            <th>
+                EmailId
+            </th>
+            <th></th>
+        </tr>
+        @foreach (var items in Model.UpdateList)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => items.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.MiddleName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.DateOfBirth)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.AddedOn)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.AddedBy)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.HomeAddress)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.HomeCity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.FaceBookAccountId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.LinkedInId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.UpdateOn)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.ImagePath)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.TwitterId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => items.EmailId)
+                </td>
+                <td>
+            </tr>
+        }
+</table>
