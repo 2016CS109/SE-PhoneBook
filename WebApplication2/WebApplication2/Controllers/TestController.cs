@@ -10,37 +10,31 @@ namespace WebApplication2.Controllers
 {
     public class TestController : Controller
     {
+        private PhoneBookDbEntities entity = new PhoneBookDbEntities();
+        private List<Person> person_temp_lst = new List<Person>();
+        private List<Person> person_temp_lst1 = new List<Person>();
+        private List<Contact> contact_temp_lst = new List<Contact>();
+
         // GET: Test
         public ActionResult Index()
         {        
-            PhoneBookDbEntities db = new PhoneBookDbEntities();
-            List<Person> list = db.People.ToList();
-            List<Person> temp = new List<Person>();
-            //List<StudentViewModel> viewList = new List<StudentViewModel>();
-            foreach (Person s in list)
+            List<Person> person_list = entity.People.ToList();
+            foreach (Person s in person_list)
             {
                 if(s.AddedBy == User.Identity.GetUserId())
                 {
-                    temp.Add(s);
+                    person_temp_lst.Add(s);
                 }
-            }
-            
-            return View(temp);
-            //using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
-            //{
-            //    return View(obj.People.ToList());
-            //}
+            }            
+            return View(person_temp_lst);
         }
 
         //GET: Test
         public ActionResult ContactIndex()
         {
-            PhoneBookDbEntities db = new PhoneBookDbEntities();
-            List<Person> list = db.People.ToList();
-            List<Contact> contact_lst = db.Contacts.ToList();
-            List<Contact> temp = new List<Contact>();
-            //List<StudentViewModel> viewList = new List<StudentViewModel>();
-            foreach (Person s in list)
+            List<Person> person_list = entity.People.ToList();
+            List<Contact> contact_lst = entity.Contacts.ToList();
+            foreach (Person s in person_list)
             {
                 if (s.AddedBy == User.Identity.GetUserId())
                 {
@@ -48,52 +42,51 @@ namespace WebApplication2.Controllers
                     {
                         if (s.PersonId == contact.PersonId)
                         {
-                            temp.Add(contact);
+                            contact_temp_lst.Add(contact);
                         }
-                    }
-                    
+                    }                  
                 }
             }
-            return View(temp);
+            return View(contact_temp_lst);
         }
+
+        //GET: Test
         public ActionResult Dashboard()
         {
             int counter = 0;
-            PhoneBookDbEntities db = new PhoneBookDbEntities();
-            List<Person> list = db.People.ToList();
-            List<Person> temp = new List<Person>();
-            List<Person> temp1 = new List<Person>();
-            //List<StudentViewModel> viewList = new List<StudentViewModel>();
-            foreach (Person s in list)
+            List<Person> person_list = entity.People.ToList();
+            foreach (Person s in person_list)
             {
                 if (s.AddedBy == User.Identity.GetUserId())
                 {
                     DateTime bd = Convert.ToDateTime(s.DateOfBirth);
+                    DateTime ud = Convert.ToDateTime(s.UpdateOn);
                     counter = counter + 1;
                     if ( bd.Day == DateTime.Now.AddDays(1).Day || bd.Day == DateTime.Now.AddDays(10).Day || (bd.Day > DateTime.Now.AddDays(1).Day && bd.Day < DateTime.Now.AddDays(10).Day))
                     {
-                        temp.Add(s);
+                        person_temp_lst.Add(s);
                     }
-                    if (s.UpdateOn == DateTime.Now.AddDays(-1) || s.UpdateOn == DateTime.Now.AddDays(-7) || (s.UpdateOn < DateTime.Now.AddDays(-1) && s.UpdateOn > DateTime.Now.AddDays(-7)))
+                    if (ud.Date == DateTime.Now.AddDays(-1).Date || ud.Date == DateTime.Now.AddDays(-7).Date || (ud.Date < DateTime.Now.AddDays(-1).Date && ud.Date > DateTime.Now.AddDays(-7).Date))
                     {
-                        temp1.Add(s);
+                        person_temp_lst1.Add(s);
                     }
                 }
             }
             Session["No_of_Person_Added"] = counter;
             var model = new Class3()
             {
-               BirthdayList = temp,
-               UpdateList = temp1,
+               BirthdayList = person_temp_lst,
+               UpdateList = person_temp_lst1,
             };
            return View(model);
         }
+
         // GET: Test/Details/5
         public ActionResult Details(int id)
         {
-            using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+            using (entity)
             {
-                return View(obj.People.Where(x => x.PersonId == id).FirstOrDefault());
+                return View(entity.People.Where(x => x.PersonId == id).FirstOrDefault());
             }
             
         }
@@ -127,10 +120,10 @@ namespace WebApplication2.Controllers
                 p.ImagePath = obj.ImagePath;
                 p.TwitterId = obj.TwitterId;
                 p.EmailId = obj.EmailId;
-                using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+                using (entity)
                 {
-                    ent.People.Add(p);
-                    ent.SaveChanges();
+                    entity.People.Add(p);
+                    entity.SaveChanges();
                 }
                 return RedirectToAction("Index");
             }
@@ -143,9 +136,9 @@ namespace WebApplication2.Controllers
         // GET: Test/Edit/5
         public ActionResult Edit(int id)
         {
-            using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+            using (entity)
             {
-                return View(obj.People.Where(x => x.PersonId == id).FirstOrDefault());
+                return View(entity.People.Where(x => x.PersonId == id).FirstOrDefault());
             }
         }
 
@@ -156,10 +149,10 @@ namespace WebApplication2.Controllers
             try
             {
                 // TODO: Add update logic here
-                using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+                using (entity)
                 {
-                    ent.Entry(obj).State = System.Data.Entity.EntityState.Modified;
-                    ent.SaveChanges();
+                    entity.Entry(obj).State = System.Data.Entity.EntityState.Modified;
+                    entity.SaveChanges();
                 }
                 return RedirectToAction("Index");
             }
@@ -173,21 +166,18 @@ namespace WebApplication2.Controllers
         public ActionResult Delete(int id)
         {
             int count = 0;
-            using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+            List<Contact> contact_list = entity.Contacts.ToList();
+            foreach (Contact s in contact_list)
             {
-                List<Contact> list = ent.Contacts.ToList();
-                foreach (Contact s in list)
+                if (s.PersonId == id)
                 {
-                    if (s.PersonId == id)
-                    {
-                        count = count + 1;
-                    }
+                    count = count + 1;
                 }
             }
             Session["No_of_Contact_Added_Against_this_Person"] = count;
-            using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+            using (entity)
             {
-                return View(obj.People.Where(x => x.PersonId == id).FirstOrDefault());
+                return View(entity.People.Where(x => x.PersonId == id).FirstOrDefault());
             }
         }
         
@@ -198,24 +188,22 @@ namespace WebApplication2.Controllers
             try
             {
                 // TODO: Add delete logic here
-                using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+                using (entity)
                 {
                     
-                    Person person = ent.People.Where(x => x.PersonId == id).FirstOrDefault();
-                    //Contact contact = ent.Contacts.Where(x => x.PersonId == id).FirstOrDefault();
-                    //ent.Contacts.Remove(contact);
-                    List<Contact> list = ent.Contacts.ToList();
-                    foreach (Contact s in list)
+                    Person person = entity.People.Where(x => x.PersonId == id).FirstOrDefault();
+                    List<Contact> contact_list = entity.Contacts.ToList();
+                    foreach (Contact s in contact_list)
                     {
                         if (s.PersonId == id)
                         {
-                            ent.Contacts.Remove(s);
-                            ent.SaveChanges();
+                            entity.Contacts.Remove(s);
+                            entity.SaveChanges();
                         }
                     }
                     
-                    ent.People.Remove(person);
-                    ent.SaveChanges();
+                    entity.People.Remove(person);
+                    entity.SaveChanges();
                 }
                 return RedirectToAction("Index");
             }
@@ -224,6 +212,7 @@ namespace WebApplication2.Controllers
                 return View();
             }
         }
+
         // GET: Test/Contact
         public ActionResult Contact()
         {
@@ -238,10 +227,10 @@ namespace WebApplication2.Controllers
                 c.ContactNumber = obj.ContactNumber;
                 c.Type = obj.Type;
                 c.PersonId = id;
-                using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+                using (entity)
                 {
-                    ent.Contacts.Add(c);
-                    ent.SaveChanges();
+                    entity.Contacts.Add(c);
+                    entity.SaveChanges();
                 }
                 return RedirectToAction("ContactIndex");
             }
@@ -251,35 +240,35 @@ namespace WebApplication2.Controllers
             }
         }
 
-        // GET: Test/Details/5
+        // GET: Test/ContactDetails/5
         public ActionResult ContactDetails(int id)
         {
-            using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+            using (entity)
             {
-                return View(obj.Contacts.Where(x => x.ContactId == id).FirstOrDefault());
+                return View(entity.Contacts.Where(x => x.ContactId == id).FirstOrDefault());
             }
 
         }
-        // GET: Test/Edit/5
+        // GET: Test/ContactEdit/5
         public ActionResult ContactEdit(int id)
         {
-            using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+            using (entity)
             {
-                return View(obj.Contacts.Where(x => x.ContactId == id).FirstOrDefault());
+                return View(entity.Contacts.Where(x => x.ContactId == id).FirstOrDefault());
             }
         }
 
-        // POST: Test/Edit/5
+        // POST: Test/ContactEdit/5
         [HttpPost]
         public ActionResult ContactEdit(int id, Contact obj)
         {
             try
             {
                 // TODO: Add update logic here
-                using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+                using (entity)
                 {
-                    ent.Entry(obj).State = System.Data.Entity.EntityState.Modified;
-                    ent.SaveChanges();
+                    entity.Entry(obj).State = System.Data.Entity.EntityState.Modified;
+                    entity.SaveChanges();
                 }
                 return RedirectToAction("ContactIndex");
             }
@@ -289,27 +278,27 @@ namespace WebApplication2.Controllers
             }
         }
 
-        // GET: Test/Delete/5
+        // GET: Test/ContactDelete/5
         public ActionResult ContactDelete(int id)
         {
-            using (PhoneBookDbEntities obj = new PhoneBookDbEntities())
+            using (entity)
             {
-                return View(obj.Contacts.Where(x => x.ContactId == id).FirstOrDefault());
+                return View(entity.Contacts.Where(x => x.ContactId == id).FirstOrDefault());
             }
         }
 
-        // POST: Test/Delete/5
+        // POST: Test/ContactDelete/5
         [HttpPost]
         public ActionResult ContactDelete(int id, FormCollection collection)
         {
             try
             {
                 // TODO: Add delete logic here
-                using (PhoneBookDbEntities ent = new PhoneBookDbEntities())
+                using (entity)
                 {
-                    Contact contact = ent.Contacts.Where(x => x.ContactId == id).FirstOrDefault();
-                    ent.Contacts.Remove(contact);
-                    ent.SaveChanges();
+                    Contact contact = entity.Contacts.Where(x => x.ContactId == id).FirstOrDefault();
+                    entity.Contacts.Remove(contact);
+                    entity.SaveChanges();
                 }
                 return RedirectToAction("ContactIndex");
             }

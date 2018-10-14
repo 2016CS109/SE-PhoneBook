@@ -135,4 +135,3 @@ D:\Lab4\SE-PhoneBook\WebApplication2\WebApplication2\bin\Microsoft.Owin.Security
 D:\Lab4\SE-PhoneBook\WebApplication2\WebApplication2\bin\Microsoft.Owin.Security.MicrosoftAccount.xml
 D:\Lab4\SE-PhoneBook\WebApplication2\WebApplication2\obj\Debug\WebApplication2.dll
 D:\Lab4\SE-PhoneBook\WebApplication2\WebApplication2\obj\Debug\WebApplication2.pdb
-D:\Lab4\SE-PhoneBook\WebApplication2\WebApplication2\obj\Debug\WebApplication2.csprojResolveAssemblyReference.cache
